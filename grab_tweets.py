@@ -1,35 +1,58 @@
 import os
 import yaml
+
 import csv
-import tweepy
+import json
+import sqlite3
 import pandas as pd
+
+from tweepy import Stream, OAuthHandler
+from tweepy.streaming import StreamListener
+
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+import uuid
+from db.models import Tweet
 
 with open('./twitter_credentials.yaml', 'r') as f:
 	creds = yaml.load(f)
 
-auth = tweepy.OAuthHandler(creds['consumer']['key'], creds['consumer']['secret'])
+auth = OAuthHandler(creds['consumer']['key'], creds['consumer']['secret'])
 auth.set_access_token(creds['access']['key'], creds['access']['secret'])
 
-api = tweepy.API(auth, wait_on_rate_limit=True)
+engine = create_engine('postgresql://postgres:postgres@localhost:5432/scotrugbytweet')
+base = declarative_base()
 
-csv_file = open('tweets.csv', 'a')
-csv_writer = csv.writer(csv_file)
+Session = sessionmaker(engine)
+session = Session()
 
-api_query = tweepy.Cursor(api.search, q='#AsOne', lang='en', since='2018-11-01')
+base.metadata.create_all(engine)
 
-locations = (
-	'Scotland', 'SCO', 'Glasgow', 'Edinburgh',
-	'Aberdeen',	'Inverness', 'Dundee', 'Perth'
-	'Stirling', 'Alba', 'United Kingdom', 'UK'
-	)
+class Listener(StreamListener):
 
-tweets = []
-for tweet in api_query.items():
-	if any(location in tweet.user.location for location in locations):
-		tweet_data = (tweet.created_at, tweet.text, tweet.user.location)
-		tweets.append(tweet_data)
+    def on_data(self, data):
+        tweet_data = json.loads(data)
+        print(tweet_data['text'])
+        
+        tweet = Tweet(id=uuid.uuid4(), timestamp=int(tweet_data['timestamp_ms']), tweet=tweet_data['text'])        
+        session.add(tweet)
+        session.commit()
+        return(True)
 
-tweets_df = pd.DataFrame(tweets)
-tweets_df.columns = ['datetime', 'tweet', 'location']
+    def on_error(self, status):
+        print(status)
 
-tweets_df.to_pickle("./tweets_df.pickle")
+
+scottish_rugby_terms = [
+	"#AsOne",
+	"WarriorNation",
+	"#AlwaysEdinburgh"
+	"@scotlandteam",
+	"@GlasgowWarriors",
+	"@EdinburghRugby"
+]
+
+stream = Stream(auth, Listener())
+stream.filter(track=scottish_rugby_terms)
