@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
 
-from db.base import Base
+base = declarative_base()
 
-class Tweet(Base):
+class Tweet(base):
 	__tablename__ = 'tweets'
 
 	id = Column(String, primary_key=True)
