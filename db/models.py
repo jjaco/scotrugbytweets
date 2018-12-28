@@ -9,3 +9,4 @@ class Tweet(base):
 	id = Column(String, primary_key=True)
 	timestamp = Column(Integer)
 	tweet = Column(String)
+	entities = Column(String)
