@@ -40,7 +40,7 @@ class Listener(StreamListener):
         
         tweet = Tweet(
             id=uuid.uuid4(), 
-            timestamp=int(tweet_data['timestamp_ms']), 
+            timestamp=pd.to_datetime(int(tweet_data['timestamp_ms']), unit='ms'), 
             tweet=tweet_data['text'],
             entities=extract_entities(tweet_data['text'])
             )
