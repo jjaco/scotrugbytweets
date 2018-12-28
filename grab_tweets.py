@@ -16,6 +16,8 @@ from sqlalchemy.orm import sessionmaker
 import uuid
 from db.models import Tweet
 
+from nlp import extract_entities 
+
 with open('./twitter_credentials.yaml', 'r') as f:
 	creds = yaml.load(f)
 
@@ -36,7 +38,13 @@ class Listener(StreamListener):
         tweet_data = json.loads(data)
         print(tweet_data['text'])
         
-        tweet = Tweet(id=uuid.uuid4(), timestamp=int(tweet_data['timestamp_ms']), tweet=tweet_data['text'])        
+        tweet = Tweet(
+            id=uuid.uuid4(), 
+            timestamp=int(tweet_data['timestamp_ms']), 
+            tweet=tweet_data['text'],
+            entities=extract_entities(tweet_data['text'])
+            )
+        
         session.add(tweet)
         session.commit()
         return(True)
