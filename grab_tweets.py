@@ -18,13 +18,15 @@ from db.models import Tweet
 
 from nlp import extract_entities 
 
-with open('./twitter_credentials.yaml', 'r') as f:
+with open('./credentials.yaml', 'r') as f:
 	creds = yaml.load(f)
 
 auth = OAuthHandler(creds['consumer']['key'], creds['consumer']['secret'])
 auth.set_access_token(creds['access']['key'], creds['access']['secret'])
 
-engine = create_engine('postgresql://postgres:postgres@localhost:5432/scotrugbytweet')
+engine_str = 'postgresql://{0}:{1}@localhost:5432/scotrugbytweet'.format(creds['postgres']['user'], creds['postgres']['pass'])
+
+engine = create_engine(engine_str)
 base = declarative_base()
 
 Session = sessionmaker(engine)
