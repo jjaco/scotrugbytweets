@@ -17,3 +17,12 @@ services:
     build:
       context: ./listener
       dockerfile: Dockerfile
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - db
