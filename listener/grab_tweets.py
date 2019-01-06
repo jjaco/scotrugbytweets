@@ -24,7 +24,7 @@ with open('./credentials.yaml', 'r') as f:
 auth = OAuthHandler(creds['consumer']['key'], creds['consumer']['secret'])
 auth.set_access_token(creds['access']['key'], creds['access']['secret'])
 
-engine_str = 'postgresql://{0}:{1}@localhost:5432/scotrugbytweet'.format(creds['postgres']['user'], creds['postgres']['pass'])
+engine_str = 'postgresql://{0}:{1}@db:5432/scotrugbytweet'.format(creds['postgres']['user'], creds['postgres']['pass'])
 
 engine = create_engine(engine_str)
 base = declarative_base()
