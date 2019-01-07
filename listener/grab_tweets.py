@@ -65,4 +65,4 @@ scottish_rugby_terms = [
 ]
 
 stream = Stream(auth, Listener())
-stream.filter(track=scottish_rugby_terms)
+stream.filter(track=scottish_rugby_terms, stall_warnings=True)
