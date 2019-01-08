@@ -23,6 +23,8 @@ services:
       - db
     environment:
       - PYTHONUNBUFFERED=1
+    restart: on-failure:5 
+
 
   frontend:
     build:
