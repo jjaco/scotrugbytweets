@@ -3,7 +3,11 @@ from sqlalchemy import create_engine
 import pandas as pd
 from itertools import chain
 
-import matplotlib.pyplot as plt
+from bokeh.embed import components
+from bokeh.plotting import figure
+from bokeh.resources import INLINE
+from bokeh.util.string import encode_utf8
+
 import io
 import base64
 
@@ -22,19 +26,38 @@ df_query = (
 df_query['entities'] = df_query['entities'].apply(lambda row: row[1:-1].split(', '))
 entities = pd.Series([row[1:-1] for row in list(chain(*df_query['entities'].values))])
 
-def fig():
-    entities.value_counts()[:10].plot(kind='bar')
-    img = io.BytesIO()
-    plt.savefig(img, format='png', bbox_inches='tight')
-    img.seek(0)
-    return img
+@app.route('/dash')
+def bokeh():
 
-@app.route('/graphs')
-def graphs():   
-    graph = fig()
-    return send_file(graph, 
-        attachment_filename='plot.png', 
-        mimetype='image/png')
+    N = 10
+    top_N_entities = entities.value_counts()[:N]
+
+    x = list(top_N_entities.index)
+    y = list(top_N_entities.values)
+
+    fig = figure(plot_width=600, plot_height=600, x_range=x)
+    fig.vbar(
+        x=x,
+        top=y,
+        color='navy',
+        width=0.9
+    )
+
+    # grab the static resources
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    # render template
+    script, div = components(fig)
+    html = render_template(
+        'index.html',
+        plot_script=script,
+        plot_div=div,
+        js_resources=js_resources,
+        css_resources=css_resources,
+    )
+    return encode_utf8(html)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
