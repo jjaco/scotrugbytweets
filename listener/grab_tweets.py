@@ -56,10 +56,7 @@ class Listener(StreamListener):
 
 
 scottish_rugby_terms = [
-	"#AsOne",
-	"WarriorNation",
-	"#AlwaysEdinburgh"
-	"@scotlandteam",
+	"@Scotlandteam",
 	"@GlasgowWarriors",
 	"@EdinburghRugby"
 ]
