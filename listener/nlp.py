@@ -3,7 +3,10 @@ from nltk.tree import Tree
 
 def clean_tweet(tweet):
 	twitter_punc = ['#', '@']
-	terms_to_remove = ['Edinburgh', 'Glasgow', 'Scotstoun', 'Murrayfield', 'Scotland']
+	terms_to_remove = ['Edinburgh', 'Glasgow', 'Scotstoun', 
+        'Murrayfield', 'Scotland', 'Warrior',
+        'England', 'Wales', 'Italy', 'France',
+        'Ireland', 'Pro14', 'Guinness']
 	filter_list = twitter_punc + terms_to_remove
 
 	filtered = [word for word in tweet.split() if not any(punc in word for punc in filter_list)]
