@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=scotrugbytweet
+    volumes:
+      - ./data:/var/lib/postgresql/
+
+  listener:
+    build:
+      context: ./listener
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: on-failure:5 
+
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+    depends_on:
+      - db
+    environment:
+      - PYTHONUNBUFFERED=1
+
+volumes:
+  data: {}
