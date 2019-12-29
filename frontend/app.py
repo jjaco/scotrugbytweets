@@ -1,3 +1,4 @@
+import yaml
 from flask import Flask, request, render_template, send_file
 from sqlalchemy import create_engine
 import pandas as pd
@@ -8,6 +9,9 @@ import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as graph_obj
+
+with open('./credentials.yaml', 'r') as f:
+    creds = yaml.load(f)
 
 
 def create_app():
@@ -25,7 +29,7 @@ app.layout = html.Div([
     html.Div(id="graph")
 ])
 
-engine = create_engine('postgresql://postgres:postgres@db:5432/scotrugbytweet')
+engine = create_engine('postgresql://{0}:{1}@db:5432/scotrugbytweet'.format(creds['postgres']['user'], creds['postgres']['pass']))
 
 df_query = pd.read_sql_query("""
 		SELECT entities
