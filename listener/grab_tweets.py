@@ -1,9 +1,5 @@
-import os
 import yaml
-
-import csv
 import json
-import sqlite3
 import pandas as pd
 
 from tweepy import Stream, OAuthHandler
@@ -16,10 +12,10 @@ from sqlalchemy.orm import sessionmaker
 import uuid
 from db.models import Tweet
 
-from nlp import extract_entities 
+from nlp import extract_entities
 
 with open('./credentials.yaml', 'r') as f:
-	creds = yaml.load(f)
+    creds = yaml.load(f)
 
 auth = OAuthHandler(creds['consumer']['key'], creds['consumer']['secret'])
 auth.set_access_token(creds['access']['key'], creds['access']['secret'])
@@ -34,31 +30,32 @@ session = Session()
 
 base.metadata.create_all(engine)
 
+
 class Listener(StreamListener):
 
     def on_data(self, data):
         tweet_data = json.loads(data)
         print(tweet_data['text'])
-        
+
         tweet = Tweet(
-            id=uuid.uuid4(), 
-            timestamp=pd.to_datetime(int(tweet_data['timestamp_ms']), unit='ms'), 
+            id=uuid.uuid4(),
+            timestamp=pd.to_datetime(int(tweet_data['timestamp_ms']), unit='ms'),
             tweet=tweet_data['text'],
             entities=extract_entities(tweet_data['text'])
-            )
-        
+        )
+
         session.add(tweet)
         session.commit()
-        return(True)
+        return (True)
 
     def on_error(self, status):
         print(status)
 
 
 scottish_rugby_terms = [
-	"@Scotlandteam",
-	"@GlasgowWarriors",
-	"@EdinburghRugby"
+    "@Scotlandteam",
+    "@GlasgowWarriors",
+    "@EdinburghRugby"
 ]
 
 stream = Stream(auth, Listener())
