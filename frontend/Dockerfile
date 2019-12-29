@@ -8,4 +8,4 @@ ADD templates templates
 
 CMD ["python", "./app.py"]
 
-EXPOSE 5000
+EXPOSE 8050
