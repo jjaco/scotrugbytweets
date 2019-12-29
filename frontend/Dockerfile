@@ -1,10 +1,10 @@
 FROM python:3.7
 
-ADD app.py /
-ADD templates templates
-ADD requirements.txt /
-
+COPY requirements.txt /
 RUN pip3 install -r requirements.txt
+
+COPY . /
+ADD templates templates
 
 CMD ["python", "./app.py"]
 
