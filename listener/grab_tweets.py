@@ -46,16 +46,17 @@ class Listener(StreamListener):
 
         session.add(tweet)
         session.commit()
-        return (True)
+        return True
 
     def on_error(self, status):
         print(status)
 
 
 scottish_rugby_terms = [
-    "@Scotlandteam",
     "@GlasgowWarriors",
-    "@EdinburghRugby"
+    "@EdinburghRugby",
+    "@Scotlandteam",
+    "@Pro14Official"
 ]
 
 stream = Stream(auth, Listener())

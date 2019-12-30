@@ -31,7 +31,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - 5000:5000
+      - 8050:8050
     depends_on:
       - db
     environment:
