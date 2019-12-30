@@ -55,7 +55,8 @@ class Listener(StreamListener):
 scottish_rugby_terms = [
     "@GlasgowWarriors",
     "@EdinburghRugby",
-    "@Scotlandteam"
+    "@Scotlandteam",
+    "@Pro14Official"
 ]
 
 stream = Stream(auth, Listener())
