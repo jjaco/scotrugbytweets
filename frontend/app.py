@@ -6,7 +6,8 @@ from itertools import chain
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
-from dash.dependencies import Input, Output, State
+import dash_table
+from dash.dependencies import Input, Output
 import plotly.graph_objects as graph_obj
 
 with open('./credentials.yaml', 'r') as f:
@@ -24,34 +25,50 @@ app = create_app()
 
 app.layout = html.Div([
     html.H2(children='jocka'),
-    html.Button("Query", id="query_data"),
-    html.Div(id="graph")
+    html.Div(id="recent_tweets", style={'padding-left': '15%', 'padding-right': '15%'}),
+    html.Div(id="graph"),
+    dcc.Interval(id='interval-component', interval=15 * 1000, n_intervals=0)
 ])
 
-engine = create_engine('postgresql://{0}:{1}@db:5432/scotrugbytweet'.format(creds['postgres']['user'], creds['postgres']['pass']))
-
-df_query = pd.read_sql_query("""
-		SELECT entities
-		FROM tweets
-		WHERE timestamp > NOW() - INTERVAL '24 hours'
-		AND LENGTH(entities) > 3
-		""", engine)
-df_query['entities'] = df_query['entities'].apply(lambda row: row[1:-1].split(', '))
-entities = pd.Series([row[1:-1] for row in list(chain(*df_query['entities'].values))])
+engine = create_engine(
+    'postgresql://{0}:{1}@db:5432/scotrugbytweet'.format(creds['postgres']['user'], creds['postgres']['pass']))
 
 
-@app.callback(Output('graph', 'children'), [Input('query_data', component_property='n_clicks')])
+@app.callback(Output('graph', 'children'), [Input('interval-component', 'n_intervals')])
 def graph(n):
+    df_query = pd.read_sql_query("""
+    		SELECT entities
+    		FROM tweets
+    		WHERE timestamp > NOW() - INTERVAL '24 hours'
+    		AND LENGTH(entities) > 3
+    		""", engine)
+    df_query['entities'] = df_query['entities'].apply(lambda row: row[1:-1].split(', '))
+    entities = pd.Series([row[1:-1] for row in list(chain(*df_query['entities'].values))])
+
     N = 10
     top_N_entities = entities.value_counts()[:N]
-
-    print(top_N_entities)
 
     x = list(top_N_entities.index)
     y = list(top_N_entities.values)
 
     bar = graph_obj.Bar(x=x, y=y, name='Results')
     return html.Div([dcc.Graph(id="bar_plot", figure=graph_obj.Figure(data=bar))])
+
+
+@app.callback(Output('recent_tweets', 'children'), [Input('interval-component', 'n_intervals')])
+def most_recent_tweets(n):
+    tweets = pd.read_sql_query("""
+        		SELECT tweet
+        		FROM tweets
+        		ORDER BY timestamp DESC LIMIT 5
+        		""", engine)
+
+    table = dash_table.DataTable(id='table',
+                                 columns=[{"name": i, "id": i} for i in tweets.columns],
+                                 data=tweets.to_dict('rows'),
+                                 style_table={"overflowX": "scroll"},
+                                 style_cell={"textAlign": "left"})
+    return table
 
 
 if __name__ == '__main__':
