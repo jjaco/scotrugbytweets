@@ -24,7 +24,11 @@ def create_app():
 app = create_app()
 
 app.layout = html.Div([
-    html.H2(children='jocka'),
+    html.Div([
+        html.Div(html.H2(children='jocka'), style={'display': 'inline-block', 'width': '20%', 'textAlign': 'right'}),
+        html.Div(html.Img(src=app.get_asset_url('jocka.jpg'),
+                          style={'height': '40%', 'width': '40%'}),
+                 style={'display': 'inline-block', 'width': '10%'})]),
     html.Div(id="recent_tweets", style={'padding-left': '15%', 'padding-right': '15%'}),
     html.Div(id="graph"),
     dcc.Interval(id='interval-component', interval=15 * 1000, n_intervals=0)
