@@ -62,10 +62,12 @@ def graph(n):
 @app.callback(Output('recent_tweets', 'children'), [Input('interval-component', 'n_intervals')])
 def most_recent_tweets(n):
     tweets = pd.read_sql_query("""
-        		SELECT tweet
+        		SELECT timestamp, tweet
         		FROM tweets
-        		ORDER BY timestamp DESC LIMIT 5
+        		ORDER BY timestamp DESC LIMIT 10
         		""", engine)
+
+    tweets['timestamp'] = pd.to_datetime(tweets['timestamp']).dt.strftime('%B %d, %Y, %X')
 
     table = dash_table.DataTable(id='table',
                                  columns=[{"name": i, "id": i} for i in tweets.columns],
